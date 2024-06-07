@@ -22,5 +22,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
         //角色相关页面
         registry.addViewController("/page/role/list").setViewName("role/list");
+        registry.addViewController("/page/role/edit").setViewName("role/edit");
+        registry.addViewController("/page/role/add").setViewName("role/add");
+
+        //主机列表
+        registry.addViewController("/page/host/list").setViewName("host/list");
+        //资产探测页面
+        registry.addViewController("/page/assets/show").setViewName("host/assets");
+
     }
 }

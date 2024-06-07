@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>系统角色管理</title>
+    <title>系统主机管理</title>
     <link rel="stylesheet" href="/layui/css/layui.css" media="all">
     <link rel="stylesheet" href="/layui/layuiAdmin/css/admin.css" media="all">
 </head>
@@ -13,9 +13,9 @@
         <div class="layui-form layui-card-header layuiadmin-card-header-auto" style="border-radius: 0;border-top: 4px solid #d2d2d2;">
             <div class="layui-form-item">
                 <div class="layui-inline">
-                    <label class="layui-form-label">角色名</label>
+                    <label class="layui-form-label">主机</label>
                     <div class="layui-input-inline">
-                        <input type="text" name="keywords" placeholder="请输入角色名" autocomplete="off" class="layui-input">
+                        <input type="text" name="keywords" placeholder="请输入主机信息" autocomplete="off" class="layui-input">
                     </div>
                 </div>
                 <div class="layui-inline">
@@ -36,7 +36,9 @@
             <table id="LAY-user-manage" lay-filter="LAY-user-manage"></table>
 
             <script type="text/html" id="table-useradmin-webuser">
-                <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
+                <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="detail"><i class="layui-icon layui-icon-edit"></i>详情</a>
+                <a class="layui-btn  layui-btn-xs" lay-event="assets"><i class="layui-icon layui-icon-app"></i>资产探测</a>
+                <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="threat"><i class="layui-icon layui-icon-auz"></i>威胁探测</a>
                 <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
             </script>
 
@@ -67,7 +69,7 @@
             var hours = now.getHours();
             var minutes = now.getMinutes();
             var seconds = now.getSeconds();
-            return year + "-" + month + "-" + date +" "+hours+":"+minutes+":"+seconds;
+            return year + "-" + (month>9 ? month : '0'+month) + "-" + (date>9 ? date : '0'+date) +" "+(hours>9 ? hours : '0'+hours)+":"+(minutes>9 ? minutes : '0'+minutes)+":"+seconds;
         }
         return "";
     }
@@ -87,7 +89,7 @@
         table.render({
             elem: '#LAY-user-manage'
             ,method: 'post'
-            ,url:'/role/list' //后端接口
+            ,url:'/host/list' //后端接口
             ,headers: {
                 'Authorization': localStorage.getItem('token')
             }
@@ -97,10 +99,32 @@
             ,cols: [
                 [
                 {type: 'checkbox', fixed: 'left'}
-                ,{field:'roleId',title:'ID',width: 80}
-                ,{field:'roleName', title:'角色名',width: 100}
-                ,{field:'roleDesc', title:'角色描述',width: 100}
-                ,{fixed: 'right', title:'操作', toolbar: '#table-useradmin-webuser',width:180}
+                ,{field:'hostId',title:'ID',width: 50}
+                ,{field:'hostname', title:'主机名',width: 200}
+                    ,{field:'status', title:'状态',width: 75, templet: function(d){
+                        if(d.status === 1){
+                            return '<a class="layui-btn layui-btn-xs layui-btn-normal">在线</a>';
+                        }else{
+                            return '<a class="layui-btn layui-btn-xs layui-btn-danger">离线</a>';
+                        }
+                    }}
+                ,{field:'ip', title:'IP',width: 170}
+                ,{field:'mac', title:'MAC',width: 170}
+                ,{field:'osName', title:'操作系统',width: 250}
+                ,{field:'osVersion', title:'版本',width: 150}
+                ,{field:'osType', title:'类型',width: 100}
+                ,{field:'osArch', title:'架构',width: 80}
+                ,{field:'cpu', title:'CPU',width: 350}
+                ,{field:'ram', title:'内存',width: 80,templet: function(d){
+                    return d.ram + 'GB';
+                    }}
+                ,{field: 'createTime', title:'创建时间',width: 180,templet:function (d){
+                    return formatDate(d.createTime);
+                    }}
+                ,{field: 'updateTime', title:'更新时间',width: 180,templet:function (d){
+                    return formatDate(d.updateTime);
+                    }}
+                ,{fixed: 'right', title:'操作', toolbar: '#table-useradmin-webuser',width:350}
             ]]
             ,page: {
                 curr: 1 //设定初始在第 5 页
@@ -115,7 +139,7 @@
             if(obj.event === 'del'){
                 layer.confirm('真的删除吗?', function(index){
                     $.ajax({
-                        url:"/role/delete", //请求后端接口地址
+                        url:"/host/delete", //请求后端接口地址
                         type:"post", //请求方式get | post
                         headers: {
                             'Authorization': localStorage.getItem('token')
@@ -133,12 +157,67 @@
                         }
                     })
                 });
-            } else if(obj.event === 'edit'){
+            } else if(obj.event === 'assets'){
                 layer.open({
                     type: 2
-                    ,title: '修改角色'
+                    ,title: '资产探测'
                     ,skin: 'layui-layer-molv'
-                    ,content: '/page/role/edit'
+                    ,content: '/page/assets/show'
+                    ,maxmin: true
+                    ,area: ['480px', '310px']
+                    ,btn: ['确定', '取消']
+                    ,success: function (layero,index){ //弹出层加载之前执行
+                        // 获取选中行的数据
+                        // 获取弹出层的表单
+                        var body = layer.getChildFrame("body",index);
+                        var contentWindow = layero.find('iframe')[0].contentWindow;//得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+                        // 获取编辑表单中用户名元素
+                        // 数据回显到弹出的表单中
+                        contentWindow.layui.form.val('layuiadmin-form-useradmin', {
+                            "hostId": data.hostId
+                            ,"hostname": data.hostname
+                            ,"mac": data.mac
+                        });
+
+                    }
+                    ,yes: function (index,layero){
+                        var iframeWindow = window['layui-layer-iframe'+ index]
+                            ,submitID = 'LAY-user-front-submit'
+                            ,submit = layero.find('iframe').contents().find('#'+ submitID);
+                        //监听提交--隐藏按钮
+                        iframeWindow.layui.form.on('submit('+ submitID +')', function(data2){
+                            var field = data2.field; //获取提交的字段
+                            // 通过Ajax方式将参数提交到后端--保存数据库中
+                            $.ajax({
+                                url:"/host/edit",
+                                type:"post",
+                                headers: {
+                                    'Authorization': localStorage.getItem('token')
+                                },
+                                data:JSON.stringify(field),
+                                contentType: "application/json;charset=utf-8", //提交参数类型为json格式
+                                dataType:"json",
+                                success:function (res){
+                                    if(res.code == 0){//成功
+                                        layer.msg(res.msg);//弹出提示
+                                        table.reload('LAY-user-manage'); //数据刷新
+                                        layer.close(index); //关闭弹层
+                                    }else{//系统出问题
+                                        layer.msg(res.msg,{icon: 5});//弹出提示
+                                    }
+                                }
+                            })
+                        });
+                        submit.trigger('click');
+                    }
+
+                });
+            }else if(obj.event === 'threat'){
+                layer.open({
+                    type: 2
+                    ,title: '详细信息'
+                    ,skin: 'layui-layer-molv'
+                    ,content: '/page/host/edit'
                     ,maxmin: true
                     ,area: ['480px', '310px']
                     ,btn: ['确定', '取消']
@@ -165,7 +244,63 @@
                             var field = data2.field; //获取提交的字段
                             // 通过Ajax方式将参数提交到后端--保存数据库中
                             $.ajax({
-                                url:"/role/edit",
+                                url:"/host/edit",
+                                type:"post",
+                                headers: {
+                                    'Authorization': localStorage.getItem('token')
+                                },
+                                data:JSON.stringify(field),
+                                contentType: "application/json;charset=utf-8", //提交参数类型为json格式
+                                dataType:"json",
+                                success:function (res){
+                                    if(res.code == 0){//成功
+                                        layer.msg(res.msg);//弹出提示
+                                        table.reload('LAY-user-manage'); //数据刷新
+                                        layer.close(index); //关闭弹层
+                                    }else{//系统出问题
+                                        layer.msg(res.msg,{icon: 5});//弹出提示
+                                    }
+                                }
+                            })
+                        });
+                        submit.trigger('click');
+                    }
+
+                });
+            }
+            else if(obj.event === 'detail'){
+                layer.open({
+                    type: 2
+                    ,title: '详细信息'
+                    ,skin: 'layui-layer-molv'
+                    ,content: '/page/host/edit'
+                    ,maxmin: true
+                    ,area: ['480px', '310px']
+                    ,btn: ['确定', '取消']
+                    ,success: function (layero,index){ //弹出层加载之前执行
+                        // 获取选中行的数据
+                        // 获取弹出层的表单
+                        var body = layer.getChildFrame("body",index);
+                        var contentWindow = layero.find('iframe')[0].contentWindow;//得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+                        // 获取编辑表单中用户名元素
+                        // 数据回显到弹出的表单中
+                        contentWindow.layui.form.val('layuiadmin-form-useradmin', {
+                            "roleId": data.roleId
+                            ,"roleName": data.roleName
+                            ,"roleDesc": data.roleDesc
+                        });
+
+                    }
+                    ,yes: function (index,layero){
+                        var iframeWindow = window['layui-layer-iframe'+ index]
+                            ,submitID = 'LAY-user-front-submit'
+                            ,submit = layero.find('iframe').contents().find('#'+ submitID);
+                        //监听提交--隐藏按钮
+                        iframeWindow.layui.form.on('submit('+ submitID +')', function(data2){
+                            var field = data2.field; //获取提交的字段
+                            // 通过Ajax方式将参数提交到后端--保存数据库中
+                            $.ajax({
+                                url:"/host/edit",
                                 type:"post",
                                 headers: {
                                     'Authorization': localStorage.getItem('token')
@@ -196,7 +331,7 @@
             var field = data.field;
             //执行重载
             table.reload('LAY-user-manage', {
-                url: '/role/list',
+                url: '/host/list',
                 method: "post",
                 headers: {
                     'Authorization': localStorage.getItem('token')
@@ -224,7 +359,7 @@
                     console.log(roleIds)
                     // 提交给后端
                     $.ajax({
-                        url:"/role/delete",
+                        url:"/host/delete",
                         type:"post",
                         headers: {
                             'Authorization': localStorage.getItem('token')
@@ -248,7 +383,7 @@
                     type: 2
                     ,title: '添加用户'
                     ,skin: 'layui-layer-molv'
-                    ,content: '/page/role/add'
+                    ,content: '/page/host/add'
                     ,maxmin: true
                     ,area: ['580px', '350px']
                     ,btn: ['确定', '取消']
@@ -261,7 +396,7 @@
                                 var field = data.field; //获取提交的字段
                                 // 通过Ajax方式将参数提交到后端--保存数据库中
                                 $.ajax({
-                                    url:"/role/add",
+                                    url:"/host/add",
                                     type:"post",
                                     headers: {
                                         'Authorization': localStorage.getItem('token')

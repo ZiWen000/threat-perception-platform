@@ -35,8 +35,6 @@
             <!--  表格数据加载 -->
             <table id="LAY-user-manage" lay-filter="LAY-user-manage"></table>
 
-
-
             <script type="text/html" id="table-useradmin-webuser">
                 <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
                 <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
@@ -95,7 +93,7 @@
             }
             ,width: 'auto'// 自适应宽度
             ,cellMinWidth: 80 //全局定义常规单元格的最小宽度
-            ,title: '系统用户数据表'
+            ,title: '系统角色数据表'
             ,cols: [
                 [
                 {type: 'checkbox', fixed: 'left'}
@@ -117,12 +115,12 @@
             if(obj.event === 'del'){
                 layer.confirm('真的删除吗?', function(index){
                     $.ajax({
-                        url:"/user/delete", //请求后端接口地址
+                        url:"/role/delete", //请求后端接口地址
                         type:"post", //请求方式get | post
                         headers: {
                             'Authorization': localStorage.getItem('token')
                         },
-                        data:{ids:[data.id]}, //数据
+                        data:{ids:[data.roleId]}, //数据
                         dataType:"json", //后端返回参数类型
                         success:function (res){ //请求成功后回调函数res = JSONObject.toJSONString(resultMap)
                             if(res.code == 0){//成功
@@ -138,9 +136,9 @@
             } else if(obj.event === 'edit'){
                 layer.open({
                     type: 2
-                    ,title: '修改用户'
+                    ,title: '修改角色'
                     ,skin: 'layui-layer-molv'
-                    ,content: '/page/user/edit'
+                    ,content: '/page/role/edit'
                     ,maxmin: true
                     ,area: ['480px', '310px']
                     ,btn: ['确定', '取消']
@@ -152,10 +150,9 @@
                         // 获取编辑表单中用户名元素
                         // 数据回显到弹出的表单中
                         contentWindow.layui.form.val('layuiadmin-form-useradmin', {
-                            "id": data.id
-                            ,"userName": data.userName
-                            ,"userRole": data.userRole
-                            ,"userStatus": data.userStatus
+                            "roleId": data.roleId
+                            ,"roleName": data.roleName
+                            ,"roleDesc": data.roleDesc
                         });
 
                     }
@@ -164,11 +161,11 @@
                             ,submitID = 'LAY-user-front-submit'
                             ,submit = layero.find('iframe').contents().find('#'+ submitID);
                         //监听提交--隐藏按钮
-                        iframeWindow.layui.form.on('submit('+ submitID +')', function(data){
-                            var field = data.field; //获取提交的字段
+                        iframeWindow.layui.form.on('submit('+ submitID +')', function(data2){
+                            var field = data2.field; //获取提交的字段
                             // 通过Ajax方式将参数提交到后端--保存数据库中
                             $.ajax({
-                                url:"/user/edit",
+                                url:"/role/edit",
                                 type:"post",
                                 headers: {
                                     'Authorization': localStorage.getItem('token')
@@ -199,7 +196,7 @@
             var field = data.field;
             //执行重载
             table.reload('LAY-user-manage', {
-                url: '/user/list',
+                url: '/role/list',
                 method: "post",
                 headers: {
                     'Authorization': localStorage.getItem('token')
@@ -220,18 +217,19 @@
 
                 // 程序走到这里，表示已经有选中要删除的数据了。
                 layer.confirm('确定删除吗？',function (){
-                    var userIds = new Array();
+                    var roleIds = new Array();
                     $.each(checkData,function (index,item){
-                           userIds.push(item.id);
+                           roleIds.push(item.roleId);
                     })
+                    console.log(roleIds)
                     // 提交给后端
                     $.ajax({
-                        url:"/user/delete",
+                        url:"/role/delete",
                         type:"post",
                         headers: {
                             'Authorization': localStorage.getItem('token')
                         },
-                        data:{ids:userIds},
+                        data:{ids:roleIds},
                         dataType:"json",
                         success:function (res){
                             if(res.code == 0){//成功
@@ -250,7 +248,7 @@
                     type: 2
                     ,title: '添加用户'
                     ,skin: 'layui-layer-molv'
-                    ,content: '/page/user/add'
+                    ,content: '/page/role/add'
                     ,maxmin: true
                     ,area: ['580px', '350px']
                     ,btn: ['确定', '取消']
@@ -263,7 +261,7 @@
                                 var field = data.field; //获取提交的字段
                                 // 通过Ajax方式将参数提交到后端--保存数据库中
                                 $.ajax({
-                                    url:"/user/save",
+                                    url:"/role/add",
                                     type:"post",
                                     headers: {
                                         'Authorization': localStorage.getItem('token')
