@@ -40,4 +40,19 @@ public class RabbitMQConsumer {
             channel.basicAck(deliveryTag, false);
         }
     }
+
+    @RabbitListener(queues = {"status_queue"})
+    public void status(String message, @Headers Map<String,Object> headers,
+                        Channel channel) throws IOException {
+        System.out.println("接收到消息: " + message);
+        // 将数据存储到数据库
+        Host host = JSON.parseObject(message, Host.class);
+        // 存储到数据库
+        int res = hostService.updateByMac(host);
+        // 手动签收消息
+        // 手动 ACK, 先获取 deliveryTag
+        Long deliveryTag = (Long) headers.get(AmqpHeaders.DELIVERY_TAG);
+        // ACK
+        channel.basicAck(deliveryTag, false);
+    }
 }

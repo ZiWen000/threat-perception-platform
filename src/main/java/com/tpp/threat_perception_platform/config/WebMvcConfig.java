@@ -29,6 +29,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addViewController("/page/host/list").setViewName("host/list");
         //资产探测页面
         registry.addViewController("/page/assets/show").setViewName("host/assets");
+        registry.addViewController("/page/host/detail").setViewName("host/detail");//主机详情
 
     }
 }

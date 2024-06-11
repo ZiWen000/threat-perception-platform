@@ -47,4 +47,9 @@ public class HostServiceImpl implements HostService {
 
         return new ResponseResult(pageInfo.getTotal(), pageInfo.getList());
     }
+
+    public int updateByMac(Host host) {
+        host.setUpdateTime(new java.util.Date());
+        return hostMapper.updateByMacSelective(host);
+    }
 }

@@ -13,4 +13,6 @@ public interface HostService {
      * @return
      */
     ResponseResult list(MyParam param);
+
+    int updateByMac(Host host);
 }

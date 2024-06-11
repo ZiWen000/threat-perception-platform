@@ -23,6 +23,20 @@
                         <i class="layui-icon layui-icon-search layuiadmin-button-btn"></i>
                     </button>
                 </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">开始时间</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="start" id="startTime" placeholder="请选择开始时间" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">结束时间</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="end" id="endTime" placeholder="请选择结束时间" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+
+
             </div>
         </div>
         <div class="layui-card-body">
@@ -79,7 +93,29 @@
         base: '/layui/layuiAdmin/' //静态资源所在路径
     }).extend({
         index: 'lib/index' //主入口模块
-    }).use(['layer','table','form'], function(){
+    }).use(['layer','table','form', 'laydate'], function(){
+        var form = layui.form;
+        var laydate = layui.laydate;
+
+        // 初始化日期选择器
+        laydate.render({
+            elem: '#startTime', //指定元素
+            type: 'datetime'
+        });
+        laydate.render({
+            elem: '#endTime',
+            type: 'datetime'
+        });
+
+        // 监听提交按钮，添加时间参数
+        form.on('submit(LAY-sysuser-front-search)', function(data) {
+            var field = data.field; // 包括输入的关键字和时间
+            //执行重载
+            table.reload('LAY-user-manage', {
+                where: field
+            });
+            return false; //阻止表单跳转。
+        });
         var $ = layui.$
             ,form = layui.form
             ,layer = layui.layer
@@ -217,7 +253,7 @@
                     type: 2
                     ,title: '详细信息'
                     ,skin: 'layui-layer-molv'
-                    ,content: '/page/host/edit'
+                    ,content: '/page/host/threat'
                     ,maxmin: true
                     ,area: ['480px', '310px']
                     ,btn: ['确定', '取消']
@@ -273,7 +309,7 @@
                     type: 2
                     ,title: '详细信息'
                     ,skin: 'layui-layer-molv'
-                    ,content: '/page/host/edit'
+                    ,content: '/page/host/detail'
                     ,maxmin: true
                     ,area: ['480px', '310px']
                     ,btn: ['确定', '取消']
@@ -285,43 +321,20 @@
                         // 获取编辑表单中用户名元素
                         // 数据回显到弹出的表单中
                         contentWindow.layui.form.val('layuiadmin-form-useradmin', {
-                            "roleId": data.roleId
-                            ,"roleName": data.roleName
-                            ,"roleDesc": data.roleDesc
+                            "hostname": data.hostname
+                            ,"ip": data.ip
+                            ,"mac": data.mac
+                            ,"osName": data.osName
+                            ,"osVersion": data.osVersion
+                            ,"osType": data.osType
+                            ,"osArch": data.osArch
+                            ,"cpu": data.cpu
+                            ,"ram": data.ram
+                            ,"createTime": data.createTime
+                            ,"updateTime": data.updateTime
                         });
 
                     }
-                    ,yes: function (index,layero){
-                        var iframeWindow = window['layui-layer-iframe'+ index]
-                            ,submitID = 'LAY-user-front-submit'
-                            ,submit = layero.find('iframe').contents().find('#'+ submitID);
-                        //监听提交--隐藏按钮
-                        iframeWindow.layui.form.on('submit('+ submitID +')', function(data2){
-                            var field = data2.field; //获取提交的字段
-                            // 通过Ajax方式将参数提交到后端--保存数据库中
-                            $.ajax({
-                                url:"/host/edit",
-                                type:"post",
-                                headers: {
-                                    'Authorization': localStorage.getItem('token')
-                                },
-                                data:JSON.stringify(field),
-                                contentType: "application/json;charset=utf-8", //提交参数类型为json格式
-                                dataType:"json",
-                                success:function (res){
-                                    if(res.code == 0){//成功
-                                        layer.msg(res.msg);//弹出提示
-                                        table.reload('LAY-user-manage'); //数据刷新
-                                        layer.close(index); //关闭弹层
-                                    }else{//系统出问题
-                                        layer.msg(res.msg,{icon: 5});//弹出提示
-                                    }
-                                }
-                            })
-                        });
-                        submit.trigger('click');
-                    }
-
                 });
             }
         });
