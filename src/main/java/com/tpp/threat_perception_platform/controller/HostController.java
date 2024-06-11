@@ -1,5 +1,6 @@
 package com.tpp.threat_perception_platform.controller;
 
+import com.tpp.threat_perception_platform.param.AssetsParam;
 import com.tpp.threat_perception_platform.param.MyParam;
 import com.tpp.threat_perception_platform.response.ResponseResult;
 import com.tpp.threat_perception_platform.service.HostService;
@@ -22,5 +23,11 @@ public class HostController {
     @PostMapping("/list")
     public ResponseResult list(MyParam param){
         return hostService.list(param);
+    }
+
+    @PostMapping("/assets/get")
+    public ResponseResult assetsGet(@RequestBody AssetsParam param){
+        System.out.println(param);
+        return hostService.assetsGet(param);
     }
 }
