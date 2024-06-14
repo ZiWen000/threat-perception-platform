@@ -25,6 +25,17 @@ public class HostController {
         return hostService.list(param);
     }
 
+    /**
+     * 获取主机列表,无分页
+     * @param param
+     * @return
+     */
+    @PostMapping("/list/all")
+    public ResponseResult list(){
+        return hostService.list();
+    }
+
+
     @PostMapping("/assets/get")
     public ResponseResult assetsGet(@RequestBody AssetsParam param){
         System.out.println(param);

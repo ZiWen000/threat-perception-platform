@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tpp.threat_perception_platform.dao.ServiceMapper">
+
+    <resultMap id="BaseResultMap" type="com.tpp.threat_perception_platform.pojo.Service">
+            <id property="id" column="id" jdbcType="INTEGER"/>
+            <result property="protocol" column="protocol" jdbcType="VARCHAR"/>
+            <result property="port" column="port" jdbcType="INTEGER"/>
+            <result property="state" column="state" jdbcType="VARCHAR"/>
+            <result property="name" column="name" jdbcType="VARCHAR"/>
+            <result property="product" column="product" jdbcType="VARCHAR"/>
+            <result property="version" column="version" jdbcType="VARCHAR"/>
+            <result property="extrainfo" column="extrainfo" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,protocol,port,
+        state,name,product,
+        version,extrainfo
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from service
+        where  id = #{id,jdbcType=INTEGER} 
+    </select>
+    <select id="findAll" resultType="com.tpp.threat_perception_platform.pojo.Service">
+        select
+        <include refid="Base_Column_List" />
+        from service
+        <where>
+            <if test="param.keywords != null and param.keywords != ''">
+                and mac like concat('%',#{param.keywords},'%')
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from service
+        where  id = #{id,jdbcType=INTEGER} 
+    </delete>
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.tpp.threat_perception_platform.pojo.Service" useGeneratedKeys="true">
+        insert into service
+        ( id,protocol,port
+        ,state,name,product
+        ,version,extrainfo)
+        values (#{id,jdbcType=INTEGER},#{protocol,jdbcType=VARCHAR},#{port,jdbcType=INTEGER}
+        ,#{state,jdbcType=VARCHAR},#{name,jdbcType=VARCHAR},#{product,jdbcType=VARCHAR}
+        ,#{version,jdbcType=VARCHAR},#{extrainfo,jdbcType=VARCHAR})
+    </insert>
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.tpp.threat_perception_platform.pojo.Service" useGeneratedKeys="true">
+        insert into service
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="id != null">id,</if>
+                <if test="protocol != null">protocol,</if>
+                <if test="port != null">port,</if>
+                <if test="state != null">state,</if>
+                <if test="name != null">name,</if>
+                <if test="product != null">product,</if>
+                <if test="version != null">version,</if>
+                <if test="extrainfo != null">extrainfo,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+                <if test="id != null">#{id,jdbcType=INTEGER},</if>
+                <if test="protocol != null">#{protocol,jdbcType=VARCHAR},</if>
+                <if test="port != null">#{port,jdbcType=INTEGER},</if>
+                <if test="state != null">#{state,jdbcType=VARCHAR},</if>
+                <if test="name != null">#{name,jdbcType=VARCHAR},</if>
+                <if test="product != null">#{product,jdbcType=VARCHAR},</if>
+                <if test="version != null">#{version,jdbcType=VARCHAR},</if>
+                <if test="extrainfo != null">#{extrainfo,jdbcType=VARCHAR},</if>
+        </trim>
+    </insert>
+    <insert id="insertSelectiveBatch">
+        insert into service
+        (protocol, port, state, name, product, version, extrainfo, mac)
+        values
+        <foreach collection="serviceList" separator="," item="item">
+            (#{item.mac},
+            #{item.protocole},
+            #{item.por},
+            #{item.state},
+            #{item.name},
+            #{item.product},
+            #{item.extrainfo},
+            #{item.version})
+        </foreach>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.tpp.threat_perception_platform.pojo.Service">
+        update service
+        <set>
+                <if test="protocol != null">
+                    protocol = #{protocol,jdbcType=VARCHAR},
+                </if>
+                <if test="port != null">
+                    port = #{port,jdbcType=INTEGER},
+                </if>
+                <if test="state != null">
+                    state = #{state,jdbcType=VARCHAR},
+                </if>
+                <if test="name != null">
+                    name = #{name,jdbcType=VARCHAR},
+                </if>
+                <if test="product != null">
+                    product = #{product,jdbcType=VARCHAR},
+                </if>
+                <if test="version != null">
+                    version = #{version,jdbcType=VARCHAR},
+                </if>
+                <if test="extrainfo != null">
+                    extrainfo = #{extrainfo,jdbcType=VARCHAR},
+                </if>
+        </set>
+        where   id = #{id,jdbcType=INTEGER} 
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.tpp.threat_perception_platform.pojo.Service">
+        update service
+        set 
+            protocol =  #{protocol,jdbcType=VARCHAR},
+            port =  #{port,jdbcType=INTEGER},
+            state =  #{state,jdbcType=VARCHAR},
+            name =  #{name,jdbcType=VARCHAR},
+            product =  #{product,jdbcType=VARCHAR},
+            version =  #{version,jdbcType=VARCHAR},
+            extrainfo =  #{extrainfo,jdbcType=VARCHAR}
+        where   id = #{id,jdbcType=INTEGER} 
+    </update>
+</mapper>

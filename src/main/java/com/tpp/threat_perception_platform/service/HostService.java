@@ -15,6 +15,12 @@ public interface HostService {
      */
     ResponseResult list(MyParam param);
 
+    /**
+     * 不分页的获取所有主机列表
+     * @return
+     */
+    ResponseResult list();
+
     int updateByMac(Host host);
 
     /**

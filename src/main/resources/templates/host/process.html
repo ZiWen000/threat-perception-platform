@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>进程列表</title>
+    <link rel="stylesheet" href="/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="/layui/layuiAdmin/css/admin.css" media="all">
+</head>
+<body>
+
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-form layui-card-header layuiadmin-card-header-auto" style="border-radius: 0;border-top: 4px solid #d2d2d2;">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">主机名</label>
+                    <div class="layui-input-inline">
+<!--                        <input type="text" name="keywords" placeholder="请输入主机信息" autocomplete="off" class="layui-input">-->
+                        <select name="keywords" id="hosts-items">
+                            <option value="">请选择主机</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <button class="layui-btn layuiadmin-btn-useradmin" lay-submit lay-filter="LAY-sysuser-front-search">
+                        <i class="layui-icon layui-icon-search layuiadmin-button-btn"></i>
+                    </button>
+                </div>
+
+
+            </div>
+        </div>
+        <div class="layui-card-body">
+
+            <div style="padding-bottom: 10px;">
+                <button class="layui-btn layuiadmin-btn-useradmin" data-type="batchdel">删除</button>
+                <button class="layui-btn layuiadmin-btn-useradmin" data-type="add">添加</button>
+            </div>
+
+            <!--  表格数据加载 -->
+            <table id="LAY-user-manage" lay-filter="LAY-user-manage"></table>
+
+            <script type="text/html" id="table-useradmin-webuser">
+                <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="detail"><i class="layui-icon layui-icon-edit"></i>详情</a>
+                <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+            </script>
+
+
+            <!--  创建时间格式化处理 -->
+            <script type="text/html" id="createTimeTpl">
+                {{formatDate(d.createTime)}}
+            </script>
+
+            <!--  更新时间格式化处理 -->
+            <script type="text/html" id="updateTimeTpl">
+                {{formatDate(d.updateTime)}}
+            </script>
+
+        </div>
+    </div>
+</div>
+
+<script src="/layui/layui.js"></script>
+<script type="text/javascript">
+    // 日期格式转换函数
+    function formatDate(str) {
+        if(str != null){
+            var now = new Date(str);
+            var year = now.getFullYear();  //取得4位数的年份
+            var month = now.getMonth() + 1;  //取得日期中的月份，其中0表示1月，11表示12月
+            var date = now.getDate();      //返回日期月份中的天数（1到31）
+            var hours = now.getHours();
+            var minutes = now.getMinutes();
+            var seconds = now.getSeconds();
+            return year + "-" + (month>9 ? month : '0'+month) + "-" + (date>9 ? date : '0'+date) +" "+(hours>9 ? hours : '0'+hours)+":"+(minutes>9 ? minutes : '0'+minutes)+":"+seconds;
+        }
+        return "";
+    }
+</script>
+<script type="text/javascript">
+    layui.config({
+        base: '/layui/layuiAdmin/' //静态资源所在路径
+    }).extend({
+        index: 'lib/index' //主入口模块
+    }).use(['layer','table','form', 'laydate'], function(){
+        var form = layui.form;
+        var laydate = layui.laydate;
+
+        // 初始化日期选择器
+        laydate.render({
+            elem: '#startTime', //指定元素
+            type: 'datetime'
+        });
+        laydate.render({
+            elem: '#endTime',
+            type: 'datetime'
+        });
+
+        // 监听提交按钮，添加时间参数
+        form.on('submit(LAY-sysuser-front-search)', function(data) {
+            var field = data.field; // 包括输入的关键字和时间
+            //执行重载
+            table.reload('LAY-user-manage', {
+                where: field
+            });
+            return false; //阻止表单跳转。
+        });
+        var $ = layui.$
+            ,form = layui.form
+            ,layer = layui.layer
+            ,table = layui.table;
+
+        //加载table
+        table.render({
+            elem: '#LAY-user-manage'
+            ,method: 'post'
+            ,url:'/process/list' //后端接口
+            ,headers: {
+                'Authorization': localStorage.getItem('token')
+            }
+            ,width: 'auto'// 自适应宽度
+            ,cellMinWidth: 80 //全局定义常规单元格的最小宽度
+            ,title: '主机进程列表'
+            ,cols: [
+                [
+                {type: 'checkbox', fixed: 'left'}
+                ,{field:'id', title:'ID',width: 30}
+                    ,{field:'mac', title:'MAC',width: 150}
+                ,{field:'pid', title:'PID',width: 50}
+                ,{field:'ppid', title:'PPID',width: 50}
+                ,{field:'name', title:'进程名',width: 100}
+                ,{field:'cmd', title:'CMD',width: 170}
+                ,{field:'priority', title:'优先级',width: 50}
+                ,{field:'description', title:'详细描述',width: 200}
+                // ,{fixed: 'right', title:'操作', toolbar: '#table-useradmin-webuser',width:350}
+            ]]
+            ,page: {
+                curr: 1 //设定初始在第 5 页
+                ,limit: 5 //设定初始每页显示 5 条
+            },
+            limits:[5,10,15,20]
+        });
+
+        //监听行工具事件: 单行删除和修改
+        table.on('tool(LAY-user-manage)', function(obj){
+            var data = obj.data;
+            if(obj.event === 'del'){
+                layer.confirm('真的删除吗?', function(index){
+                    $.ajax({
+                        url:"/host/delete", //请求后端接口地址
+                        type:"post", //请求方式get | post
+                        headers: {
+                            'Authorization': localStorage.getItem('token')
+                        },
+                        data:{ids:[data.roleId]}, //数据
+                        dataType:"json", //后端返回参数类型
+                        success:function (res){ //请求成功后回调函数res = JSONObject.toJSONString(resultMap)
+                            if(res.code == 0){//成功
+                                layer.msg(res.msg);//弹出提示
+                                table.reload('LAY-user-manage'); //数据刷新
+                                layer.close(index); //关闭弹层
+                            }else {
+                                layer.msg(res.msg,{icon: 5});//弹出提示
+                            }
+                        }
+                    })
+                });
+            }
+        });
+
+        //监听搜索
+        form.on('submit(LAY-sysuser-front-search)', function(data){
+            var field = data.field;
+            //执行重载
+            table.reload('LAY-user-manage', {
+                url: '/process/list',
+                method: "post",
+                headers: {
+                    'Authorization': localStorage.getItem('token')
+                },
+                where: field
+            });
+        });
+
+        // //事件 批量删除，添加用户
+        // var active = {
+        //     batchdel: function(){
+        //         var checkStatus = table.checkStatus('LAY-user-manage')
+        //             ,checkData = checkStatus.data; //得到选中的数据
+        //
+        //         if(checkData.length == 0){
+        //             return layer.msg('请选择数据');
+        //         }
+        //
+        //         // 程序走到这里，表示已经有选中要删除的数据了。
+        //         layer.confirm('确定删除吗？',function (){
+        //             var roleIds = new Array();
+        //             $.each(checkData,function (index,item){
+        //                    roleIds.push(item.roleId);
+        //             })
+        //             console.log(roleIds)
+        //             // 提交给后端
+        //             $.ajax({
+        //                 url:"/host/delete",
+        //                 type:"post",
+        //                 headers: {
+        //                     'Authorization': localStorage.getItem('token')
+        //                 },
+        //                 data:{ids:roleIds},
+        //                 dataType:"json",
+        //                 success:function (res){
+        //                     if(res.code == 0){//成功
+        //                         layer.msg(res.msg);
+        //                         table.reload('LAY-user-manage'); //数据刷新
+        //                         layer.close(index); //关闭弹层
+        //                     }else{
+        //                         layer.msg(res.msg,{icon: 5});//弹出提示
+        //                     }
+        //                 }
+        //             })
+        //         })
+        //     }
+        // };
+        //
+        // $('.layui-btn.layuiadmin-btn-useradmin').on('click', function(){
+        //     var type = $(this).data('type');
+        //     active[type] ? active[type].call(this) : '';
+        // });
+
+        //获取所有的主机列表
+        $.ajax({
+            url:"/host/list/all",
+            type:"post",
+            headers: {
+                'Authorization': localStorage.getItem('token')
+            },
+            data:{},
+            dataType:"json",
+            success:function (res){
+                if(res.code === 0){//成功
+                    var data = res.data;
+                    var html = "";
+                    $("#hosts-items").empty();
+                    $("#hosts-items").append('<option value="">请选择主机</option>');
+                    $(data).each(function (){
+                        //生成一个option
+                        var op = '<option value="'+this.mac+'">'+this.hostname+'</option>';
+                        //追加到select
+                        $("#hosts-items").append(op);
+                    })
+                    form.render();
+                }
+            }
+        })
+
+    });
+</script>
+</body>
+</html>

@@ -64,6 +64,12 @@ public class HostServiceImpl implements HostService {
         return new ResponseResult(pageInfo.getTotal(), pageInfo.getList());
     }
 
+    @Override
+    public ResponseResult list() {
+        List<Host> hosts = hostMapper.findAll2();
+        return new ResponseResult(0,hosts);
+    }
+
     public int updateByMac(Host host) {
         host.setUpdateTime(new java.util.Date());
         return hostMapper.updateByMacSelective(host);
@@ -76,10 +82,10 @@ public class HostServiceImpl implements HostService {
      */
     public ResponseResult assetsGet(AssetsParam param) {
         //1. 判断主机是否在线
-        //当前时间-更新时间 > 4 就表示已经离线
+        //当前时间-更新时间 > 11 就表示已经离线
         Host db_host = hostMapper.selectByMac(param.getMac());
         long delta = System.currentTimeMillis() - db_host.getUpdateTime().getTime();
-        if(delta > 4*1000){
+        if(delta > 11*1000){
             //主机下线，需要更新
             Host host = new Host();
             host.setStatus(0);

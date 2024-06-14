@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tpp.threat_perception_platform.dao.ProcessMapper">
+
+    <resultMap id="BaseResultMap" type="com.tpp.threat_perception_platform.pojo.Process">
+            <id property="id" column="id" jdbcType="INTEGER"/>
+            <result property="mac" column="mac" jdbcType="VARCHAR"/>
+            <result property="pid" column="pid" jdbcType="INTEGER"/>
+            <result property="ppid" column="ppid" jdbcType="INTEGER"/>
+            <result property="name" column="name" jdbcType="VARCHAR"/>
+            <result property="cmd" column="cmd" jdbcType="VARCHAR"/>
+            <result property="priority" column="priority" jdbcType="INTEGER"/>
+            <result property="description" column="description" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,mac,pid,
+        ppid,name,cmd,
+        priority,description
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from process
+        where  id = #{id,jdbcType=INTEGER} 
+    </select>
+    <select id="findAll" resultType="com.tpp.threat_perception_platform.pojo.Process">
+        select
+        <include refid="Base_Column_List" />
+        from process
+        <where>
+            <if test="param.keywords != null and param.keywords != ''">
+                and mac like concat('%',#{param.keywords},'%')
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from process
+        where  id = #{id,jdbcType=INTEGER} 
+    </delete>
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.tpp.threat_perception_platform.pojo.Process" useGeneratedKeys="true">
+        insert into process
+        ( id,mac,pid
+        ,ppid,name,cmd
+        ,priority,description)
+        values (#{id,jdbcType=INTEGER},#{mac,jdbcType=VARCHAR},#{pid,jdbcType=INTEGER}
+        ,#{ppid,jdbcType=INTEGER},#{name,jdbcType=VARCHAR},#{cmd,jdbcType=VARCHAR}
+        ,#{priority,jdbcType=INTEGER},#{description,jdbcType=VARCHAR})
+    </insert>
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.tpp.threat_perception_platform.pojo.Process" useGeneratedKeys="true">
+        insert into process
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="id != null">id,</if>
+                <if test="mac != null">mac,</if>
+                <if test="pid != null">pid,</if>
+                <if test="ppid != null">ppid,</if>
+                <if test="name != null">name,</if>
+                <if test="cmd != null">cmd,</if>
+                <if test="priority != null">priority,</if>
+                <if test="description != null">description,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+                <if test="id != null">#{id,jdbcType=INTEGER},</if>
+                <if test="mac != null">#{mac,jdbcType=VARCHAR},</if>
+                <if test="pid != null">#{pid,jdbcType=INTEGER},</if>
+                <if test="ppid != null">#{ppid,jdbcType=INTEGER},</if>
+                <if test="name != null">#{name,jdbcType=VARCHAR},</if>
+                <if test="cmd != null">#{cmd,jdbcType=VARCHAR},</if>
+                <if test="priority != null">#{priority,jdbcType=INTEGER},</if>
+                <if test="description != null">#{description,jdbcType=VARCHAR},</if>
+        </trim>
+    </insert>
+
+    <insert id="insertSelectiveBatch">
+        insert into process
+        (mac, pid, ppid, name, cmd, priority, description)
+        values
+        <foreach collection="processList" separator="," item="item">
+            (#{item.mac},
+            #{item.pid},
+            #{item.ppid},
+            #{item.name},
+            #{item.cmd},
+            #{item.priority},
+            #{item.description})
+        </foreach>
+    </insert>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.tpp.threat_perception_platform.pojo.Process">
+        update process
+        <set>
+                <if test="mac != null">
+                    mac = #{mac,jdbcType=VARCHAR},
+                </if>
+                <if test="pid != null">
+                    pid = #{pid,jdbcType=INTEGER},
+                </if>
+                <if test="ppid != null">
+                    ppid = #{ppid,jdbcType=INTEGER},
+                </if>
+                <if test="name != null">
+                    name = #{name,jdbcType=VARCHAR},
+                </if>
+                <if test="cmd != null">
+                    cmd = #{cmd,jdbcType=VARCHAR},
+                </if>
+                <if test="priority != null">
+                    priority = #{priority,jdbcType=INTEGER},
+                </if>
+                <if test="description != null">
+                    description = #{description,jdbcType=VARCHAR},
+                </if>
+        </set>
+        where   id = #{id,jdbcType=INTEGER} 
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.tpp.threat_perception_platform.pojo.Process">
+        update process
+        set 
+            mac =  #{mac,jdbcType=VARCHAR},
+            pid =  #{pid,jdbcType=INTEGER},
+            ppid =  #{ppid,jdbcType=INTEGER},
+            name =  #{name,jdbcType=VARCHAR},
+            cmd =  #{cmd,jdbcType=VARCHAR},
+            priority =  #{priority,jdbcType=INTEGER},
+            description =  #{description,jdbcType=VARCHAR}
+        where   id = #{id,jdbcType=INTEGER} 
+    </update>
+</mapper>
