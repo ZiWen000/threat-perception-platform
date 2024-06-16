@@ -2,6 +2,7 @@ package com.tpp.threat_perception_platform.controller;
 
 import com.tpp.threat_perception_platform.param.AssetsParam;
 import com.tpp.threat_perception_platform.param.MyParam;
+import com.tpp.threat_perception_platform.param.ThreatParam;
 import com.tpp.threat_perception_platform.response.ResponseResult;
 import com.tpp.threat_perception_platform.service.HostService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,9 +37,20 @@ public class HostController {
     }
 
 
+    /**
+     * 资产探测
+     * @param param
+     * @return
+     */
     @PostMapping("/assets/get")
     public ResponseResult assetsGet(@RequestBody AssetsParam param){
         System.out.println(param);
         return hostService.assetsGet(param);
+    }
+
+    @PostMapping("/threat/get")
+    public ResponseResult threatGet(@RequestBody ThreatParam param){
+        System.out.println(param);
+        return hostService.threatGet(param);
     }
 }

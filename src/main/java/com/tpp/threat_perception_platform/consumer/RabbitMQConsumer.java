@@ -26,6 +26,8 @@ public class RabbitMQConsumer {
     private AppService appService;
     @Autowired
     private ServiceService serviceService;
+    @Autowired
+    private HotfixService hotfixService;
 
     /**
      * 消费者，消费系统信息
@@ -151,6 +153,27 @@ public class RabbitMQConsumer {
         // 存储到数据库
         List<Service> serviceList = JSON.parseArray(message, Service.class);
         int res = serviceService.add(serviceList);
+        // 手动签收消息
+        // 手动 ACK, 先获取 deliveryTag
+        Long deliveryTag = (Long) headers.get(AmqpHeaders.DELIVERY_TAG);
+        // ACK
+        channel.basicAck(deliveryTag, false);
+    }
+
+    /**
+     * 接收补丁探测信息
+     * @param message
+     * @param headers
+     * @param channel
+     * @throws IOException
+     */
+    @RabbitListener(queues = {"hotfix_queue"})
+    public void hotfix(String message, @Headers Map<String,Object> headers,
+                        Channel channel) throws IOException {
+        System.out.println("接收到消息: " + message);
+        // 存储到数据库
+        List<Hotfix> hotfixList = JSON.parseArray(message, Hotfix.class);
+        int res = hotfixService.add(hotfixList);
         // 手动签收消息
         // 手动 ACK, 先获取 deliveryTag
         Long deliveryTag = (Long) headers.get(AmqpHeaders.DELIVERY_TAG);

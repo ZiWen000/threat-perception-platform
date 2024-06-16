@@ -6,6 +6,7 @@ import com.github.pagehelper.PageInfo;
 import com.tpp.threat_perception_platform.dao.HostMapper;
 import com.tpp.threat_perception_platform.param.AssetsParam;
 import com.tpp.threat_perception_platform.param.MyParam;
+import com.tpp.threat_perception_platform.param.ThreatParam;
 import com.tpp.threat_perception_platform.pojo.Host;
 import com.tpp.threat_perception_platform.response.ResponseResult;
 import com.tpp.threat_perception_platform.service.HostService;
@@ -81,6 +82,28 @@ public class HostServiceImpl implements HostService {
      * @return
      */
     public ResponseResult assetsGet(AssetsParam param) {
+        //1. 判断主机是否在线
+        //当前时间-更新时间 > 11 就表示已经离线
+        Host db_host = hostMapper.selectByMac(param.getMac());
+        long delta = System.currentTimeMillis() - db_host.getUpdateTime().getTime();
+        if(delta > 11*1000){
+            //主机下线，需要更新
+            Host host = new Host();
+            host.setStatus(0);
+            host.setMac(param.getMac());
+            hostMapper.updateByMacSelective(host);
+            return new ResponseResult(1005,"主机离线，请重新上线！");
+        }
+        //2. 将对象转换成json字符串
+        String data = JSON.toJSONString(param);
+        //3. 将JSON字符串发送到对应队列
+        String exchange = "agent_exchange";
+        String routingKey = param.getMac().replace(":","");
+        rabbitmqService.sendMessage(exchange,routingKey,data);
+        return new ResponseResult(0,"探测命令请求成功，请稍后查看");
+    }
+
+    public ResponseResult threatGet(ThreatParam param) {
         //1. 判断主机是否在线
         //当前时间-更新时间 > 11 就表示已经离线
         Host db_host = hostMapper.selectByMac(param.getMac());

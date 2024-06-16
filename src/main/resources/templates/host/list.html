@@ -251,9 +251,9 @@
             }else if(obj.event === 'threat'){
                 layer.open({
                     type: 2
-                    ,title: '详细信息'
+                    ,title: '威胁探测项'
                     ,skin: 'layui-layer-molv'
-                    ,content: '/page/host/threat'
+                    ,content: '/page/threat/show'
                     ,maxmin: true
                     ,area: ['480px', '310px']
                     ,btn: ['确定', '取消']
@@ -265,9 +265,9 @@
                         // 获取编辑表单中用户名元素
                         // 数据回显到弹出的表单中
                         contentWindow.layui.form.val('layuiadmin-form-useradmin', {
-                            "roleId": data.roleId
-                            ,"roleName": data.roleName
-                            ,"roleDesc": data.roleDesc
+                            "hostId": data.hostId
+                            ,"hostname": data.hostname
+                            ,"mac": data.mac
                         });
 
                     }
@@ -280,7 +280,7 @@
                             var field = data2.field; //获取提交的字段
                             // 通过Ajax方式将参数提交到后端--保存数据库中
                             $.ajax({
-                                url:"/host/edit",
+                                url:"/host/threat/get",
                                 type:"post",
                                 headers: {
                                     'Authorization': localStorage.getItem('token')
