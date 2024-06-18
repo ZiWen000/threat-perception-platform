@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tpp.threat_perception_platform.dao.WinCveDbMapper">
 
-    <resultMap id="BaseResultMap" type="pojo.WinCveDb">
+    <resultMap id="BaseResultMap" type="com.tpp.threat_perception_platform.pojo.WinCveDb">
             <id property="id" column="id" jdbcType="BIGINT"/>
             <id property="dt" column="dt" jdbcType="CHAR"/>
             <result property="cve" column="cve" jdbcType="CHAR"/>
@@ -25,6 +25,11 @@
         <include refid="Base_Column_List" />
         from win_cve_db
         where  id = #{id,jdbcType=BIGINT} AND dt = #{dt,jdbcType=CHAR} 
+    </select>
+    <select id="selectByKbId" resultType="com.tpp.threat_perception_platform.pojo.WinCveDb">
+        select cve
+        from win_cve_db
+        where  kb_list like concat('%',#{kbId},'%')
     </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
@@ -61,7 +66,7 @@
                 <if test="cvrfId != null">#{cvrfId,jdbcType=CHAR},</if>
         </trim>
     </insert>
-    <update id="updateByPrimaryKeySelective" parameterType="pojo.WinCveDb">
+    <update id="updateByPrimaryKeySelective" parameterType="com.tpp.threat_perception_platform.pojo.WinCveDb">
         update win_cve_db
         <set>
                 <if test="cve != null">
@@ -82,7 +87,7 @@
         </set>
         where   id = #{id,jdbcType=BIGINT} AND dt = #{dt,jdbcType=CHAR} 
     </update>
-    <update id="updateByPrimaryKey" parameterType="pojo.WinCveDb">
+    <update id="updateByPrimaryKey" parameterType="com.tpp.threat_perception_platform.pojo.WinCveDb">
         update win_cve_db
         set 
             cve =  #{cve,jdbcType=CHAR},

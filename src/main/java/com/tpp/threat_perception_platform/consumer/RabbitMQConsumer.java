@@ -28,6 +28,8 @@ public class RabbitMQConsumer {
     private ServiceService serviceService;
     @Autowired
     private HotfixService hotfixService;
+    @Autowired
+    private HostVulService hostVulService;
 
     /**
      * 消费者，消费系统信息
@@ -174,6 +176,27 @@ public class RabbitMQConsumer {
         // 存储到数据库
         List<Hotfix> hotfixList = JSON.parseArray(message, Hotfix.class);
         int res = hotfixService.add(hotfixList);
+        // 手动签收消息
+        // 手动 ACK, 先获取 deliveryTag
+        Long deliveryTag = (Long) headers.get(AmqpHeaders.DELIVERY_TAG);
+        // ACK
+        channel.basicAck(deliveryTag, false);
+    }
+
+    /**
+     * 接收主机漏洞信息
+     * @param message
+     * @param headers
+     * @param channel
+     * @throws IOException
+     */
+    @RabbitListener(queues = {"vul_queue"})
+    public void hostVul(String message, @Headers Map<String,Object> headers,
+                       Channel channel) throws IOException {
+        System.out.println("接收到消息: " + message);
+        // 存储到数据库
+        List<HostVul> hostVulList = JSON.parseArray(message, HostVul.class);
+        int res = hostVulService.add(hostVulList);
         // 手动签收消息
         // 手动 ACK, 先获取 deliveryTag
         Long deliveryTag = (Long) headers.get(AmqpHeaders.DELIVERY_TAG);

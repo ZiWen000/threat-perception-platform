@@ -10,6 +10,17 @@
             <result property="hotfixId" column="hotfix_id" jdbcType="VARCHAR"/>
     </resultMap>
 
+    <resultMap id="BaseResultMap2" type="com.tpp.threat_perception_platform.pojo.Hotfix">
+        <id property="id" column="id" jdbcType="INTEGER"/>
+        <result property="mac" column="mac" jdbcType="VARCHAR"/>
+        <result property="hotfixId" column="hotfix_id" jdbcType="VARCHAR"/>
+
+<!--        一对多-->
+        <collection property="winCveDbList" column="hotfix_id" ofType="com.tpp.threat_perception_platform.pojo.WinCveDb" select="com.tpp.threat_perception_platform.dao.WinCveDbMapper.selectByKbId">
+
+        </collection>
+    </resultMap>
+
     <sql id="Base_Column_List">
         id,mac,hotfix_id
     </sql>
@@ -20,7 +31,7 @@
         from hotfix
         where  id = #{id,jdbcType=INTEGER} 
     </select>
-    <select id="findAll" resultType="com.tpp.threat_perception_platform.pojo.Hotfix">
+    <select id="findAll" resultMap="BaseResultMap2">
         select
         <include refid="Base_Column_List" />
         from hotfix

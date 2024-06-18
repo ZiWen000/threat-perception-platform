@@ -8,9 +8,11 @@ import com.tpp.threat_perception_platform.param.AssetsParam;
 import com.tpp.threat_perception_platform.param.MyParam;
 import com.tpp.threat_perception_platform.param.ThreatParam;
 import com.tpp.threat_perception_platform.pojo.Host;
+import com.tpp.threat_perception_platform.pojo.Vulnerability;
 import com.tpp.threat_perception_platform.response.ResponseResult;
 import com.tpp.threat_perception_platform.service.HostService;
 import com.tpp.threat_perception_platform.service.RabbitmqService;
+import com.tpp.threat_perception_platform.service.VulnerabilityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +25,9 @@ public class HostServiceImpl implements HostService {
 
     @Autowired
     private RabbitmqService rabbitmqService;
+
+    @Autowired
+    private VulnerabilityService vulnerabilityService;
     public int save(Host host) {
         //主机入库前，先查询有没有对应的主机
         //根据mac地址来查询
@@ -115,6 +120,11 @@ public class HostServiceImpl implements HostService {
             host.setMac(param.getMac());
             hostMapper.updateByMacSelective(host);
             return new ResponseResult(1005,"主机离线，请重新上线！");
+        }
+        //判断是否携带了漏洞库
+        if(param.getVulnerability() == 1){
+            List<Vulnerability> vulnerabilityList = vulnerabilityService.list();
+            param.setVulDbs(vulnerabilityList);
         }
         //2. 将对象转换成json字符串
         String data = JSON.toJSONString(param);

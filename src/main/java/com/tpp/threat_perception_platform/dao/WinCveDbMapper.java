@@ -2,6 +2,8 @@ package com.tpp.threat_perception_platform.dao;
 
 import com.tpp.threat_perception_platform.pojo.WinCveDb;
 
+import java.util.List;
+
 /**
 * @author 26725
 * @description 针对表【win_cve_db(Windows漏洞与KB补丁关系库)】的数据库操作Mapper
@@ -17,6 +19,8 @@ public interface WinCveDbMapper {
     int insertSelective(WinCveDb record);
 
     WinCveDb selectByPrimaryKey(Long id);
+
+    List<WinCveDb> selectByKbId(String kbId);
 
     int updateByPrimaryKeySelective(WinCveDb record);
 

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tpp.threat_perception_platform.dao.HostVulMapper">
+
+    <resultMap id="BaseResultMap" type="com.tpp.threat_perception_platform.pojo.HostVul">
+            <id property="id" column="id" jdbcType="INTEGER"/>
+            <result property="mac" column="mac" jdbcType="VARCHAR"/>
+            <result property="vulId" column="vul_id" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,mac,vul_id
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from host_vul
+        where  id = #{id,jdbcType=INTEGER} 
+    </select>
+    <select id="selectByVulId" resultType="com.tpp.threat_perception_platform.pojo.HostVul">
+        select
+        <include refid="Base_Column_List" />
+        from host_vul
+        where  vul_id = #{vulId,jdbcType=INTEGER}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from host_vul
+        where  id = #{id,jdbcType=INTEGER} 
+    </delete>
+    <delete id="deleteByMac">
+        delete from host_vul
+        where  mac = #{mac,jdbcType=VARCHAR}
+    </delete>
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.tpp.threat_perception_platform.pojo.HostVul" useGeneratedKeys="true">
+        insert into host_vul
+        ( id,mac,vul_id
+        )
+        values (#{id,jdbcType=INTEGER},#{mac,jdbcType=VARCHAR},#{vulId,jdbcType=INTEGER}
+        )
+    </insert>
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.tpp.threat_perception_platform.pojo.HostVul" useGeneratedKeys="true">
+        insert into host_vul
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="id != null">id,</if>
+                <if test="mac != null">mac,</if>
+                <if test="vulId != null">vul_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+                <if test="id != null">#{id,jdbcType=INTEGER},</if>
+                <if test="mac != null">#{mac,jdbcType=VARCHAR},</if>
+                <if test="vulId != null">#{vulId,jdbcType=INTEGER},</if>
+        </trim>
+    </insert>
+    <insert id="insertSelectiveBatch">
+        insert into host_vul
+        (id,mac,vul_id)
+        values
+        <foreach collection="hostVuls" item="item" separator=",">
+            (#{item.id,jdbcType=INTEGER},#{item.mac,jdbcType=VARCHAR},#{item.vulId,jdbcType=INTEGER})
+        </foreach>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.tpp.threat_perception_platform.pojo.HostVul">
+        update host_vul
+        <set>
+                <if test="mac != null">
+                    mac = #{mac,jdbcType=VARCHAR},
+                </if>
+                <if test="vulId != null">
+                    vul_id = #{vulId,jdbcType=INTEGER},
+                </if>
+        </set>
+        where   id = #{id,jdbcType=INTEGER} 
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.tpp.threat_perception_platform.pojo.HostVul">
+        update host_vul
+        set 
+            mac =  #{mac,jdbcType=VARCHAR},
+            vul_id =  #{vulId,jdbcType=INTEGER}
+        where   id = #{id,jdbcType=INTEGER} 
+    </update>
+</mapper>
