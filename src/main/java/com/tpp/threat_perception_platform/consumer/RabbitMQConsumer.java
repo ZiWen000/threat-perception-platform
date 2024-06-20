@@ -30,6 +30,8 @@ public class RabbitMQConsumer {
     private HotfixService hotfixService;
     @Autowired
     private HostVulService hostVulService;
+    @Autowired
+    private WeakPwdService weakPwdService;
 
     /**
      * 消费者，消费系统信息
@@ -197,6 +199,27 @@ public class RabbitMQConsumer {
         // 存储到数据库
         List<HostVul> hostVulList = JSON.parseArray(message, HostVul.class);
         int res = hostVulService.add(hostVulList);
+        // 手动签收消息
+        // 手动 ACK, 先获取 deliveryTag
+        Long deliveryTag = (Long) headers.get(AmqpHeaders.DELIVERY_TAG);
+        // ACK
+        channel.basicAck(deliveryTag, false);
+    }
+
+    /**
+     * 接收弱口令探测信息
+     * @param message
+     * @param headers
+     * @param channel
+     * @throws IOException
+     */
+    @RabbitListener(queues = {"weakPwd_queue"})
+    public void weakPwd(String message, @Headers Map<String,Object> headers,
+                        Channel channel) throws IOException {
+        System.out.println("接收到消息: " + message);
+        // 存储到数据库
+        List<WeakPwd> weakPwdList = JSON.parseArray(message, WeakPwd.class);
+        int res = weakPwdService.add(weakPwdList);
         // 手动签收消息
         // 手动 ACK, 先获取 deliveryTag
         Long deliveryTag = (Long) headers.get(AmqpHeaders.DELIVERY_TAG);

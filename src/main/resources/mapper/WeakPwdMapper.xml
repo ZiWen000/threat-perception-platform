@@ -22,6 +22,16 @@
         from weak_pwd
         where  id = #{id,jdbcType=INTEGER} 
     </select>
+    <select id="findAll" resultType="com.tpp.threat_perception_platform.pojo.WeakPwd">
+        select
+        <include refid="Base_Column_List" />
+        from weak_pwd
+        <where>
+            <if test="param.keywords != null and param.keywords != ''">
+                and (mac like concat('%',#{param.keywords},'%') or u_name like concat('%',#{param.keywords},'%') or u_pwd like concat('%',#{param.keywords},'%'))
+            </if>
+        </where>
+    </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete from weak_pwd
@@ -48,6 +58,14 @@
                 <if test="uPwd != null">#{uPwd,jdbcType=VARCHAR},</if>
                 <if test="mac != null">#{mac,jdbcType=VARCHAR},</if>
         </trim>
+    </insert>
+    <insert id="insertSelectiveBatch">
+        insert into weak_pwd
+        (id,u_name,u_pwd,mac)
+        values
+        <foreach collection="weakPwdList" item="weakPwd" separator=",">
+            (#{weakPwd.id,jdbcType=INTEGER},#{weakPwd.uName,jdbcType=VARCHAR},#{weakPwd.uPwd,jdbcType=VARCHAR},#{weakPwd.mac,jdbcType=VARCHAR})
+        </foreach>
     </insert>
     <update id="updateByPrimaryKeySelective" parameterType="com.tpp.threat_perception_platform.pojo.WeakPwd">
         update weak_pwd
