@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tpp.threat_perception_platform.dao.LogsMapper">
+
+    <resultMap id="BaseResultMap" type="com.tpp.threat_perception_platform.pojo.Logs">
+            <id property="id" column="id" jdbcType="INTEGER"/>
+            <result property="mac" column="mac" jdbcType="VARCHAR"/>
+            <result property="eventId" column="event_id" jdbcType="INTEGER"/>
+            <result property="timestamp" column="timestamp" jdbcType="VARCHAR"/>
+            <result property="param1" column="param1" jdbcType="VARCHAR"/>
+            <result property="param2" column="param2" jdbcType="VARCHAR"/>
+            <result property="param3" column="param3" jdbcType="VARCHAR"/>
+            <result property="param4" column="param4" jdbcType="VARCHAR"/>
+            <result property="param5" column="param5" jdbcType="VARCHAR"/>
+            <result property="param6" column="param6" jdbcType="VARCHAR"/>
+            <result property="param7" column="param7" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,mac,event_id,
+        timestamp,param1,param2,
+        param3,param4,param5,
+        param6,param7
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from logs
+        where  id = #{id,jdbcType=INTEGER} 
+    </select>
+    <select id="findAll" resultType="com.tpp.threat_perception_platform.pojo.Logs">
+        select
+        <include refid="Base_Column_List" />
+        from logs
+        <where>
+            <if test="param.keywords != null and param.keywords != ''">
+                and mac like concat('%',#{param.keywords},'%')
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from logs
+        where  id = #{id,jdbcType=INTEGER} 
+    </delete>
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.tpp.threat_perception_platform.pojo.Logs" useGeneratedKeys="true">
+        insert into logs
+        ( id,mac,event_id
+        ,timestamp,param1,param2
+        ,param3,param4,param5
+        ,param6,param7)
+        values (#{id,jdbcType=INTEGER},#{mac,jdbcType=VARCHAR},#{eventId,jdbcType=INTEGER}
+        ,#{timestamp,jdbcType=VARCHAR},#{param1,jdbcType=VARCHAR},#{param2,jdbcType=VARCHAR}
+        ,#{param3,jdbcType=VARCHAR},#{param4,jdbcType=VARCHAR},#{param5,jdbcType=VARCHAR}
+        ,#{param6,jdbcType=VARCHAR},#{param7,jdbcType=VARCHAR})
+    </insert>
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.tpp.threat_perception_platform.pojo.Logs" useGeneratedKeys="true">
+        insert into logs
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="id != null">id,</if>
+                <if test="mac != null">mac,</if>
+                <if test="eventId != null">event_id,</if>
+                <if test="timestamp != null">timestamp,</if>
+                <if test="param1 != null">param1,</if>
+                <if test="param2 != null">param2,</if>
+                <if test="param3 != null">param3,</if>
+                <if test="param4 != null">param4,</if>
+                <if test="param5 != null">param5,</if>
+                <if test="param6 != null">param6,</if>
+                <if test="param7 != null">param7,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+                <if test="id != null">#{id,jdbcType=INTEGER},</if>
+                <if test="mac != null">#{mac,jdbcType=VARCHAR},</if>
+                <if test="eventId != null">#{eventId,jdbcType=INTEGER},</if>
+                <if test="timestamp != null">#{timestamp,jdbcType=VARCHAR},</if>
+                <if test="param1 != null">#{param1,jdbcType=VARCHAR},</if>
+                <if test="param2 != null">#{param2,jdbcType=VARCHAR},</if>
+                <if test="param3 != null">#{param3,jdbcType=VARCHAR},</if>
+                <if test="param4 != null">#{param4,jdbcType=VARCHAR},</if>
+                <if test="param5 != null">#{param5,jdbcType=VARCHAR},</if>
+                <if test="param6 != null">#{param6,jdbcType=VARCHAR},</if>
+                <if test="param7 != null">#{param7,jdbcType=VARCHAR},</if>
+        </trim>
+    </insert>
+    <insert id="insertSelectiveBatch">
+        insert into logs
+        (mac, event_id, timestamp, param1, param2, param3, param4, param5, param6, param7)
+        values
+        <foreach collection="logsList" separator="," item="item">
+            (#{item.mac},
+            #{item.eventId},
+            #{item.timestamp},
+            #{item.param1},
+            #{item.param2},
+            #{item.param3},
+            #{item.param4},
+            #{item.param5},
+            #{item.param6},
+            #{item.param7})
+        </foreach>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.tpp.threat_perception_platform.pojo.Logs">
+        update logs
+        <set>
+                <if test="mac != null">
+                    mac = #{mac,jdbcType=VARCHAR},
+                </if>
+                <if test="eventId != null">
+                    event_id = #{eventId,jdbcType=INTEGER},
+                </if>
+                <if test="timestamp != null">
+                    timestamp = #{timestamp,jdbcType=VARCHAR},
+                </if>
+                <if test="param1 != null">
+                    param1 = #{param1,jdbcType=VARCHAR},
+                </if>
+                <if test="param2 != null">
+                    param2 = #{param2,jdbcType=VARCHAR},
+                </if>
+                <if test="param3 != null">
+                    param3 = #{param3,jdbcType=VARCHAR},
+                </if>
+                <if test="param4 != null">
+                    param4 = #{param4,jdbcType=VARCHAR},
+                </if>
+                <if test="param5 != null">
+                    param5 = #{param5,jdbcType=VARCHAR},
+                </if>
+                <if test="param6 != null">
+                    param6 = #{param6,jdbcType=VARCHAR},
+                </if>
+                <if test="param7 != null">
+                    param7 = #{param7,jdbcType=VARCHAR},
+                </if>
+        </set>
+        where   id = #{id,jdbcType=INTEGER} 
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.tpp.threat_perception_platform.pojo.Logs">
+        update logs
+        set 
+            mac =  #{mac,jdbcType=VARCHAR},
+            event_id =  #{eventId,jdbcType=INTEGER},
+            timestamp =  #{timestamp,jdbcType=VARCHAR},
+            param1 =  #{param1,jdbcType=VARCHAR},
+            param2 =  #{param2,jdbcType=VARCHAR},
+            param3 =  #{param3,jdbcType=VARCHAR},
+            param4 =  #{param4,jdbcType=VARCHAR},
+            param5 =  #{param5,jdbcType=VARCHAR},
+            param6 =  #{param6,jdbcType=VARCHAR},
+            param7 =  #{param7,jdbcType=VARCHAR}
+        where   id = #{id,jdbcType=INTEGER} 
+    </update>
+</mapper>

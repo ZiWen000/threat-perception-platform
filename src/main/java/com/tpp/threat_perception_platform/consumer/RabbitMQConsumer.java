@@ -1,6 +1,7 @@
 package com.tpp.threat_perception_platform.consumer;
 
 import com.alibaba.fastjson.JSON;
+import com.mysql.cj.log.Log;
 import com.rabbitmq.client.Channel;
 import com.tpp.threat_perception_platform.pojo.*;
 import com.tpp.threat_perception_platform.pojo.Process;
@@ -32,6 +33,8 @@ public class RabbitMQConsumer {
     private HostVulService hostVulService;
     @Autowired
     private WeakPwdService weakPwdService;
+    @Autowired
+    private LogsService logsService;
 
     /**
      * 消费者，消费系统信息
@@ -220,6 +223,27 @@ public class RabbitMQConsumer {
         // 存储到数据库
         List<WeakPwd> weakPwdList = JSON.parseArray(message, WeakPwd.class);
         int res = weakPwdService.add(weakPwdList);
+        // 手动签收消息
+        // 手动 ACK, 先获取 deliveryTag
+        Long deliveryTag = (Long) headers.get(AmqpHeaders.DELIVERY_TAG);
+        // ACK
+        channel.basicAck(deliveryTag, false);
+    }
+
+    /**
+     * 接收系统日志信息
+     * @param message
+     * @param headers
+     * @param channel
+     * @throws IOException
+     */
+    @RabbitListener(queues = {"logs_queue"})
+    public void logs(String message, @Headers Map<String,Object> headers,
+                        Channel channel) throws IOException {
+        System.out.println("接收到消息: " + message);
+        // 存储到数据库
+        List<Logs> logsList = JSON.parseArray(message, Logs.class);
+        int res = logsService.add(logsList);
         // 手动签收消息
         // 手动 ACK, 先获取 deliveryTag
         Long deliveryTag = (Long) headers.get(AmqpHeaders.DELIVERY_TAG);
